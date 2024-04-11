@@ -1,0 +1,32 @@
+vector<ll> fdp(2e5, -1);
+ll fact(ll x) {
+    if (x == 0) return 1;
+    if (fdp[x] != -1) return fdp[x];
+    return fdp[x] = x * fact(x - 1);
+}
+
+// Given a permutation length, what is the ith permutation?
+// big o(len ^ 2) can be faster using ordered set
+vector<ll> nthPermutation(ll len, ll nth) {
+    vector<ll> id (len) , perm (len);
+    for (int i = 0 ; i < len ; i++) id[i] = i;
+    for (int i = len - 1 ; i >= 0 ; i--) {
+        ll p = nth / fact(i);
+        perm[len - 1 - i] = id[p];
+        id.erase(id.begin() + p);
+        nth %= fact(i);
+    }
+    return perm;
+}
+
+ll indexOfPermutation(vector<ll> perm) {
+    ll idx = 0;
+    int n = perm.size();
+    for (int i = 0 ; i < n ; i++) {
+        // Remove first, and Renumber the remaining elements to remove gap
+        idx += fact(n - i - 1) * perm[i];
+        for (int j = i + 1 ; j < n ; j++)
+            perm[j] -= perm[j] > perm[i];
+    }
+    return idx;
+}

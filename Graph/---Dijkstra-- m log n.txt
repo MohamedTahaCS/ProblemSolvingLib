@@ -1,0 +1,108 @@
+vector<ll> dijkstra(int start , auto &adj) {
+    int sz = adj.size();
+
+    vector<ll> d(sz, 1e18);
+    vector<bool> vis(sz);
+
+    priority_queue<pair<ll, ll>> pq;
+
+    d[start] = 0;
+    pq.push({0, start});
+
+    while(!pq.empty()) {
+        ll s = pq.top().second;
+        pq.pop();
+
+        if (vis[s])
+            continue;
+
+        vis[s] = true;
+
+        for (auto p : adj[s]) {
+            ll u = p.first ;
+            ll cost = p.second;
+            if (d[s] + cost < d[u]) {
+                d[u] = d[s] + cost;
+                pq.push({-d[u], u});
+            }
+        }
+    }
+    return d;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+                          Flight Discount
+int32_t main() {
+    int n , m;
+    cin >> n >> m;
+    vector<vector<pair<int,int>>> adj(n + 1);
+    for (int i = 0 ; i < m ; i++) {
+        int x , y , c;
+        cin >> x >> y >> c;
+        adj[x].push_back({y, c});
+    }
+ 
+    const ll INF = 1e18;
+    vector<vector<ll>> dp(n + 1, {INF, INF});
+ 
+    dp[1] = {0, 0};
+ 
+    struct Pos {
+        ll cost;
+        int pos;
+        bool used;
+    };
+    auto cmp = [&](Pos &a , Pos &b) {return a.cost > b.cost; };
+    priority_queue<Pos, vector<Pos>, decltype(cmp)> pq(cmp);
+ 
+    pq.push({0, 1, 0});
+    while(!pq.empty()) {
+        Pos curr = pq.top();
+        pq.pop();
+        if (curr.cost != dp[curr.pos][curr.used])
+            continue;
+ 
+        for (auto [to, toCost] : adj[curr.pos]) {
+            if (!curr.used) {
+                int newCost = curr.cost + toCost / 2;
+                if (newCost < dp[to][true]) {
+                    dp[to][true] = newCost;
+                    pq.push({newCost , to , true});
+                }
+            }
+            int newCost = curr.cost + toCost;
+            if (newCost < dp[to][curr.used]) {
+                dp[to][curr.used] = newCost;
+                pq.push({newCost , to , curr.used});
+            }
+        }
+    }
+ 
+    cout << dp[n][true] ;
+}
+///////////////////////////////////////////////////////////////////////////////
+vector< vector<pair<int,int>> > g ; // g-> graph 
+vector<int> shortpath ;
+void dijkstra(int s)
+{
+    set<pair<int,int>> st ;
+    shortpath[s]=0 ;
+    st.insert({0,s}) ;
+    while(!st.empty())
+    {
+        int v = st.begin()->second ;
+        st.erase(st.begin()) ;
+        for (auto i:g[v])
+        {
+            int to = i.first ;
+            int cost = i.second ;
+            if (shortpath[v]+cost<shortpath[to])
+            {
+                st.erase({shortpath[to],to}) ;
+                shortpath[to]=shortpath[v]+cost ;
+                st.insert({shortpath[to],to}) ;
+            }
+        }
+    }
+}
+// g.resize(n+1) ; shortpath.resize(n+1,INF) ;

@@ -1,0 +1,143 @@
+// 1 Base
+struct BIT {
+    vector<ll> bit;
+    ll n;
+
+    BIT(vector<ll> v) {
+        this-> n = v.size();
+        bit.resize(n + 1);
+        for (int i = 0 ; i < v.size() ; i++)
+            add(i + 1, v[i]);
+    }
+
+    ll lsb(ll pos) {
+        return pos & -pos;
+    }
+
+    void add(ll pos, ll value) {
+        while(pos <= n) {
+            bit[pos] += value;
+            pos += lsb(pos);
+        }
+    }
+
+    ll prefix(int pos) {
+        ll ret = 0;
+        while(pos > 0) {
+            ret += bit[pos];
+            pos -= lsb(pos);
+        }
+        return ret;
+    }
+
+    ll value(ll l, ll r) {
+        return prefix(r) - prefix(l - 1);
+    }
+};
+
+
+//////////////////////////////////////////////////////////
+// binary indexed tree -> 0 Base
+struct BIT {
+    vector<ll> bit;
+    int n;
+
+    BIT(int n) {
+        this-> n = n;
+        bit.resize(n, 0);
+    }
+
+    BIT(vector<ll> a) : BIT(a.size()) {
+        for (int i = 0; i < a.size(); i++)
+            add(i, a[i]);
+    }
+
+    ll prefix(int r) {
+        ll ret = 0;
+        for (; r >= 0; r = (r & (r + 1)) - 1)
+            ret += bit[r];
+        return ret;
+    }
+
+    ll getValue(int l, int r) {
+        return prefix(r) - prefix(l - 1);
+    }
+
+    void add(int idx, ll delta) {
+        for (; idx < n; idx = idx | (idx + 1))
+            bit[idx] += delta;
+    }
+};
+
+////////////////////////////////////////////////////////////////
+// 0base
+template<class T> struct fenwick_tree {
+    vector<T> bit;
+    int n;
+
+    fenwick_tree(int _n) {
+        init(_n);
+    }
+
+    void init(int _n) {
+        n = _n;
+        bit.assign(n, 0);
+    }
+
+    fenwick_tree(vector<int> a) : fenwick_tree(a.size()) {
+        for (size_t i = 0; i < a.size(); i++)
+            add(i, a[i]);
+    }
+
+    T prefix(int p) {
+        T res = 0;
+        for (; p >= 0; p = (p & (p + 1)) - 1)
+            res += bit[p];
+        return res;
+    }
+
+    T sum(int l, int r) {
+        return prefix(r) - prefix(l - 1);
+    }
+
+    void add(int p, int x) {
+        for (; p < n; p = p | (p + 1))
+            bit[p] += x;
+    }
+};
+
+////////////////////////////////
+
+// 0 base 
+struct FenwickTree2D {
+    vector<vector<int>> bit;
+    int n, m;
+
+    FenwickTree2D(vector<vector<int>> v) {
+        n = v.size();
+        m = v[0].size();
+        bit.resize(n, vector<int> (m));
+        for (int i = 0 ; i < n ; i++) {
+            for (int j = 0 ; j < m ; j++) {
+                add(i, j, v[i][j]);
+            }
+        }
+    }
+
+    int sum(int x, int y) {
+        int ret = 0;
+        for (int i = x; i >= 0; i = (i & (i + 1)) - 1)
+            for (int j = y; j >= 0; j = (j & (j + 1)) - 1)
+                ret += bit[i][j];
+        return ret;
+    }
+
+    void add(int x, int y, int delta) {
+        for (int i = x; i < n; i = i | (i + 1))
+            for (int j = y; j < m; j = j | (j + 1))
+                bit[i][j] += delta;
+    }
+};
+
+
+// return sum(r2,c2) - sum(r1 - 1,c2) - sum(r2,c1-1) + sum(r1-1,c1-1);

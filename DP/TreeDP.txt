@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+typedef long long ll;
+using namespace std ;
+ 
+void fast() {
+    ios_base::sync_with_stdio(false);
+    //freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+}
+int N = 2e5 + 5;
+int n ;
+vector<vector<int>> adj (N);
+vector<int> subSize (N);
+vector<ll> subAns (N);
+vector<ll> ans (N);
+ 
+void dfs(int s, int p) {
+ 
+    for (auto u : adj[s]) {
+        if (u == p)
+            continue;
+        dfs(u , s);
+        subSize[s] += subSize[u];
+        subAns[s] += subAns[u] + subSize[u];
+    }
+    subSize[s] ++;
+}
+ 
+void dfs2(int s, int p) {
+ 
+    if (s == 1) {
+        ans[s] = subAns[s];
+    }
+    else {
+        ll parAns = ans[p];
+        parAns -= subAns[s] + subSize[s];
+ 
+        ans[s] = subAns[s] + parAns + (n - subSize[s]);
+    }
+ 
+    for (auto u : adj[s]) {
+        if (u == p)
+            continue;
+        dfs2(u, s);
+    }
+}
+ 
+int32_t main() {
+    cin >> n ;
+    for (int i = 1; i <= n - 1 ;  i++) {
+        int x , y;
+        cin >> x >> y;
+        adj[x].push_back(y);
+        adj[y].push_back(x);
+    }
+ 
+    dfs(1, 0);
+ 
+    dfs2(1, 0);
+ 
+    for (int i = 1 ; i<= n ; i++)
+        cout << ans[i] <<" ";
+}

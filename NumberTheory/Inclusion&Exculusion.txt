@@ -1,0 +1,40 @@
+Your task is to calculate how many of the first n positive divisible by at least one
+of the given k prime numbers
+    for (int mask = 1 ; mask < (1<<k) ; mask++) {
+        ll parity = 0;
+        ll lcm = 1;
+        for (int j = 0 ; j < k ; j++) {
+            if (mask & (1<<j)) {
+                parity++;
+                lcm *= prime[j];
+            }
+        }
+        count +=  (n / lcm) * ((parity & 1) ? 1ll : -1ll);
+    }
+/////////////////////////////////////////////////////////////////////////////////////
+// Inclusion&Exclusion and Mobius function
+// m[1] = 1;
+// m[n] = 1 if (n is a square-free(prime factors is unique) with even number of prime factors
+// ex: m[2 * 3 * 5 * 7] = 1;
+// m[n] = -1 if (n is a square-free(prime factors is unique) with odd number of prime factors
+// ex: m[2 * 3 * 5] = -1;
+// m[n] = 0  if n has a redundant prime factor
+// ex: m[2 * 3 * 3 * 5] = 0;
+// in other way -> mu(n) = (-1)^k if n is the product of k different primes; otherwise mu(n) = 0.
+// seq = 1, -1, -1, 0, -1, 1, -1, 0, 0, 1, -1, 0, -1, 1, 1, 0
+
+int mobius(int n) {
+    int cnt = 0;
+    for (int i = 2 ; i * i <= n ; i++) {
+        if (n % i == 0) {
+            if (n % (i * i) == 0)
+                return 0; // if n has redundant p
+            n = n / i;
+            cnt++;
+        }
+    }
+    if (n != 1) cnt++;
+    if (cnt % 2 == 0) return 1;
+    else return -1;
+}
+// I can write seive also

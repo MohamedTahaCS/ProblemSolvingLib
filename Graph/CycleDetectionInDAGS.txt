@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+using namespace std ;
+ 
+#define fast ios_base::sync_with_stdio(false)
+#define ll long long
+#define ar array
+ 
+const int N = 2e5;
+int n , m;
+vector<ll> adj[N];
+ar<ll, N> par;
+bool vis[N], onStack[N];
+ 
+void dfs(int u) {
+    vis[u] = true;
+    onStack[u] = true;
+ 
+    for (auto v : adj[u]) {
+        if (onStack[v]) { // Found Cycle
+            vector<ll> ans = {v};
+            int curr = u;
+            do {
+                ans.push_back(curr);
+                curr = par[curr];
+            } while(curr != v);
+            ans.push_back(v);
+            reverse(ans.begin(), ans.end());
+ 
+            cout << ans.size() << endl;
+            for (auto x : ans)
+                cout << x <<" ";
+            exit(0);
+        }
+        if (!vis[v]) {
+            par[v] = u;
+            dfs(v);
+        }
+    }
+ 
+    onStack[u] = false;
+}
+int main() {
+    fast;
+    cin >> n >> m;
+    for (int i = 0; i < m; i++) {
+        int x , y;
+        cin >> x >> y;
+        adj[x].push_back(y);
+    }
+ 
+    for (int i = 1; i <= n; i++) {
+        if (!vis[i]) {
+            par[i] = i;
+            dfs(i);
+        }
+    }
+ 
+    cout << "NoCycle";
+}

@@ -1,0 +1,26 @@
+struct BinaryJumping {
+    ll LOG = 33 , N;
+    vector<vector<ll>> dp;
+
+    BinaryJumping(vector<ll> v) {
+        N = v.size();
+        dp.resize(LOG, vector<ll> (N));
+
+        for (int i = 0 ; i < N ; i++) dp[0][i] = v[i];
+
+        for (int j = 1 ; j < LOG ; j++) {
+            for (int i = 0 ; i < N ; i++) {
+                // dp[jumb Log][i]
+                // dp[3 == 8][2] = dp[2 == 4][ dp[4][2] ];
+                dp[j][i] = dp[j-1][ dp[j-1][i] ];
+            }
+        }
+    }
+
+    ll jumb(ll x, ll k) {
+        for (int j = 0 ; j < LOG ; j++)
+            if (k & (1ll<<j))
+                x = dp[j][x];
+        return x;
+    }
+};

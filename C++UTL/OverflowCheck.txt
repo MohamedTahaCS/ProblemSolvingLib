@@ -1,0 +1,20 @@
+// return if a * b overflow
+bool isOverflow(ll a, ll b)
+{
+    if (a == 0 || b == 0) return false;
+    ll result = a * b;
+    if (-a == result / -b) return false;
+    return true;
+}
+
+// return if x + y overflow
+int isOverflow(int a, int b) 
+{
+    if (a >= 0 && b >= 0 && (a > INT_MAX - b)) 
+        return true;
+    if (a < 0 && b < 0 && (a < INT_MIN - b)) 
+        return true;
+    return false;
+}
+
+////////////////////////////////////////////////////////////////////////////

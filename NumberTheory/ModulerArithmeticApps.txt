@@ -1,0 +1,44 @@
+// largest x such that p ^ x divide n!
+ll maxPowInFact(ll n, ll p) { // big o(log n)
+    ll x = 0;
+    while(n) {
+        x += n / p;
+        n = n / p;
+    }
+    return x;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// return n! % p after removing all p from N
+// if p > n then just loop to n and calc f(n)
+// big o(p * log(n))
+// (1 * 2 * 3 * .... * n) = (1 * 2 * 3 .... * (p-1) * p * (p + 1) .... 2p * (2p+1) ... p*p .... * n)
+// get Ps out: p, 2p, 3p..... p*p .... n/p
+// remove 1 p: 1, 2  , 3 .... p ....... n/p [subproblem]
+// Mod on others
+// 1 2 3 .... p-1
+// 1 2 3 .... p-1
+// 1 2 .... n % p
+// Wilson's theorem (p-1)! % p = p-1 = -1 underMod
+// = ((p-1)!) ^ (n / p) * (n % p)! * subproblem(n/p, p)
+
+ll factModP(ll n, ll p) { // after excluding all p's
+    if (n == 0) return 1;
+    ll res = 1;
+    for (ll i = 1 ; i <= n % p ; i++)
+        res = res * i % p;
+    n /= p;
+    if (n % 2 == 1) // flip
+        res = p - res;
+    return res * factModP(n, p) % p;
+}
+/////////////////////////////////////////////////////////////////////////////////////
+ll nCrModP_general(ll n, ll r, ll p) {
+    ll anyPow = maxPowInFact(n, p) - maxPowInFact(n - r, p) - maxPowInFact(r, p);
+    if (anyPow) return 0; // then nCr divisible by p
+
+    ll up = factModP(n, p);
+    ll down = (factModP(n - r, p) * factModP(r, p) ) % p;
+    ll downInv = fpow(down, p - 2, p);
+    return (up * downInv) % p;
+}

@@ -1,0 +1,38 @@
+class sparseTable {
+public:
+    vector<vector<int>> spt;
+    int maxlog;
+
+    sparseTable(vector<int> vec) {
+        maxlog = log2(vec.size());
+
+        spt.resize(maxlog + 1, vector<int>(vec.size()));
+
+        for (int i=0 ; i < vec.size() ; i++) spt[0][i] = vec[i];
+        for (int r=1 ; r <= maxlog ; r++) {
+            for (int c=0 ; c <= vec.size() - (1 << r) ; c++) {
+                spt[r][c] = spt[r - 1][c] + spt[r - 1][c + (1 << (r - 1))];
+            }
+        }
+    }
+
+    int get(int l , int r) {  // o(log(n))
+        int range = r - l + 1;
+        int res = 0 ;
+        for (int x = maxlog ; x >= 0 ; x--) {
+            if ((1 << x) <= range) {
+                res = res + spt[x][l];
+                l = l + (1 << x);
+                range = r - l + 1;
+            }
+        }
+        return res;
+    }
+
+    int get2(int l , int r) { // o(1)
+        int lg = 32 - __builtin_clz(r - l + 1) - 1;
+        return spt[lg][l] + spt[lg][r - (1 << lg) + 1];
+    }
+};
+// 0 base -> (l,r)
+// sparseTable spt (vec);

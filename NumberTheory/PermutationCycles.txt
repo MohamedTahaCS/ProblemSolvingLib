@@ -1,0 +1,17 @@
+void dfs(int i, vi &per, vi &vis) {
+    if (vis[i]) return;
+    vis[i] = true;
+    cout << i <<" ";
+    dfs(per[i], per, vis);
+}
+void printCycles(vi per) {
+    vi vis(per.size());
+    for (int i = 0 ; i < per.size() ; i++) {
+        if (!vis[i]) dfs(i, per, vis) , cout << " --c-- ";
+    }
+    cout << endl;
+}
+
+// perA * perA 
+// all even cycles will divided by 2
+// odd cycles will be fixed

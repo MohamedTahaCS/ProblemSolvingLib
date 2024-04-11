@@ -1,0 +1,62 @@
+// in Function graph 
+// given x , y
+// return minimum number of teleportations if I begin from X until reach Y
+#include <bits/stdc++.h>
+using namespace std ;
+
+#define fast ios_base::sync_with_stdio(false);
+#define ll long long
+#define ar array
+
+const int N = 2e5 + 5, LOG = 30;
+int n , q , len[N];
+bool vis[N];
+vector<vector<int>> dp(LOG, vector<int> (N));
+
+
+void dfs(int s) {
+    if (vis[s]) return;
+    vis[s] = true;
+    dfs(dp[0][s]);
+    len[s] = len[dp[0][s]] + 1;
+}
+
+int jump(int x, int k) {
+    if (k <= 0) return x;
+    for (int j = LOG - 1; j >= 0 ; j--) {
+        if (k & (1<<j))
+            x = dp[j][x];
+    }
+    return x;
+}
+int32_t main() {
+    fast
+    cin >> n >> q;
+    for (int i = 1 ; i <= n ; i++) {
+        cin >> dp[0][i];
+    }
+
+    for (int j = 1 ; j < LOG ; j++) {
+        for (int i = 1; i <= n ; i++) {
+            dp[j][i] = dp[j-1][dp[j-1][i]];
+        }
+    }
+
+    for (int i = 1 ; i <= n ; i++) dfs(i);
+
+    while(q--) {
+        int x , y;
+        cin >> x >> y;
+        int f = len[x] - len[y];
+        int end = jump(x, len[x] - 1);
+        int cycleLen = len[jump(end, 1)];
+
+        if (jump(x, f) == y)
+            cout << f << endl;
+        else if (jump(x, (len[x] - 1) + cycleLen - (len[y] - 1)) == y)
+            cout << (len[x] - 1) + cycleLen - (len[y] - 1) << endl;
+        else
+            cout << -1 << endl;
+    }
+}
+

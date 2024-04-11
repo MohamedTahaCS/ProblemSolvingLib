@@ -1,0 +1,51 @@
+// find x , y
+// a * x + b * y = gcd(a, b)
+ll extendedEuclid(ll a, ll b, ll &x, ll &y) {
+    if (b == 0) {
+        x = 1 , y = 0;
+        return a; // gcd between(a, b)
+    }
+    ll gcd = extendedEuclid(b, a % b, y, x);
+    // your x = previous y
+    y -= (a / b) * x;
+    return gcd;
+}
+
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+A Diophantine equaltion is an equation in which only
+integer solutions are allowed
+ax + by = c is a linear Diophantine equation in tow var x , y
+
+ax + by = c have solution if and only if  c % gcd(a,b) = 0
+why this is true ?  because I know the answer of x and y if ax + by = gcd(a,b) from Extended Euclid algo
+so if (c % gcd) I can easly generate multiply all equation by (c/gcd)
+
+
+////////////////////////////////////////////////
+Bezout's indentity
+a * x + b * y = c // not gcd
+12 * -10 + 42 * 3 = 6;
+12 * -3  + 42 * 1 = 6;
+12 * 4   + 42 * -1 = 6;
+12 * 18  + 42 * -5 = 6;
+12 * 11  + 42 * -3 = 6; // wow it's true
+gcd(12, 42) = 2
+( X = x + k * (b/gcd) , Y = y - k * (a/gcd) )
+
+only two pairs will be
+// abs(x) < abs(b/gcd) , abs(y) < abs(a/gcd)
+////////////////////////////////////////////////
+
+// solves the equation  ax congruent(---) b (mod n)
+vector<ll> modularEquation(ll a, ll b, ll n) {
+    vector<ll> sols;
+    ll x , y , g;
+    g = extendedEuclid(a, n, x, y);
+    if (b % g != 0) return sols; // no solutions
+    x = ((x * b / g) % n + n) % n; // from LDE
+    for (int i = 0 ; i < g ; i++) // Bezout's identity
+        sols.push_back( (x + i * n / g) % n );  
+    sort(sols.begin(), sols.end());
+    return sols;
+}

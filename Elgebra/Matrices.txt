@@ -1,0 +1,85 @@
+#define lp(i, n) for (int i = 0 ; i < (int) (n) ; i++)
+typedef vector<ll> row;
+typedef vector<row> matrix;
+const ll MOD = 1e9 + 7;
+struct MatricesUTIL {
+
+    matrix zero(int n, int m) {
+        return matrix(n, row(m, 0));
+    }
+
+    matrix identity(int n) {
+        matrix ret = zero(n, n);
+        lp(i, n) ret[i][i] = 1;
+        return ret;
+    }
+
+    matrix multiply(matrix a, matrix b) {
+        matrix res = zero(a.size(), b[0].size());
+        lp(i, res.size()) {
+            lp(j, res[0].size()) {
+                lp(k, a[0].size()) {
+                    res[i][j] += (a[i][k] % MOD) * (b[k][j] % MOD);
+                    res[i][j] %= MOD;
+                }
+            }
+        }
+        return res;
+    }
+
+    matrix power(matrix &x, ll k) {
+        if (k == 0) return identity(x.size());
+        matrix res = power(x, k / 2);
+        res = multiply(res, res);
+        if (k & 1) res = multiply(res, x);
+        return res;
+    }
+
+};
+
+matrix init = {{1, 0}, {0, 0}};
+matrix trans = {{19, 7}, {6, 20}};
+
+MatricesUTIL mUtil;
+trans = mUtil.power(trans, n);
+matrix res = mUtil.multiply(init, trans);
+cout << res[0][0];
+// you can go from state to another in log(n)
+// order mat.size() ^ 3 * log(n)
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+matrix add(matrix a, matrix b) {
+    matrix res = zero(a.size(), a[0].size());
+    lp(i, a.size()) {
+        lp(j, a[0].size()) {
+            res[i][j] = a[i][j] + b[i][j];
+        }
+    }
+    return res;
+}
+/////////////////////////////////
+matrix powersSum(matrix x, ll k) { // x^1 + x^2 + .. + x^k
+    if (k == 0) return zero(x.size(), x[0].size());
+    matrix subRes = powersSum(x, k / 2);
+    matrix res = multiply(subRes, pow(x, k/2));
+    res = add(res, subRes);
+    if (k & 1) res = add(res, pow(x, k));
+    return res;
+}
+/////////////////////////////////
+ll matrixTrace(matrix x) {
+    ll ret = 0;
+    lp(i, x.size()) ret += x[i][i];
+    return ret;
+}
+
+
+matrix rotate(matrix x) {
+    matrix ret = zero(x[0].size(), x.size());
+    lp(i, x.size()) {
+        lp(j, x[0].size()) {
+            ret[j][x.size() - i - 1] = x[i][j];
+        }
+    }
+    return ret;
+}

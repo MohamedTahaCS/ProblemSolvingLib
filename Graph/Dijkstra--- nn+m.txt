@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+#define FAST ios_base::sync_with_stdio(false); cin.tie(0);
+#define int long long
+using namespace std ;
+
+vector< vector< pair<int,int> > >  g   ;
+int n , m ;
+int dijkstra(int s , int e )
+{
+    vector <int> d ; vector<int> pre ; vector<bool> marked ;
+    d.clear(); pre.clear(); marked.clear() ;
+    d.resize(n+1,INT_MAX) ;pre.resize(n+1,-1) ; marked.resize(n+1) ;
+    d[s]=0 ;
+    for (int i=1 ; i<=n ;i++)
+    {
+        int v = -1;
+        for (int x = 1; x <= n; x++)
+        {
+            if (!marked[x] && (v==-1 || d[x]<d[v])) v=x ;
+        }
+        if (d[v]==INT_MAX) break ;
+        marked[v] = true ;
+        for (auto x : g[v])
+        {
+            int to = x.first ;
+            int len = x.second ;
+            if (d[v]+len<d[to])
+            {
+                d[to]=d[v]+len ; pre[to]=v ;
+            }
+        }
+    }
+    return d[e] ;
+}
+vector< int > path(int s , int e)
+{
+    vector<int> ret ;
+    while(e!=s)
+    {
+        if (e==-1) return {-1} ;
+        ret.push_back(e) ;
+        e=pre[e] ;
+    }
+    ret.push_back(s) ;
+    reverse(ret.begin(),ret.end()) ;
+    return ret ;
+}
+int32_t main()
+{
+    FAST
+    int t ;
+    cin>> t;
+    while(t--)
+    {
+        cin>>n>>m ;
+        g.clear() ; g.resize(n+1) ;
+        for (int i=0 ; i<m ; i++)
+        {
+            int x , y , z ;
+            cin>>x>>y>>z ;
+            g[x].push_back({y,z}) ;
+        }
+        int ans = dijkstra(1,n) ;
+        if (ans==INT_MAX)
+            cout<<"NO"<<endl ;
+        else cout<<ans<<endl ;
+    }
+}

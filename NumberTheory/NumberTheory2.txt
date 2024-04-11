@@ -1,0 +1,153 @@
+// euler's totient function 
+// phi[n] = number of coprimes i <= n that gcd(i, n) = 1
+// ph(1 to n) = 1,1,2,2,4,2,6,4,6,4,10,4,12,6,8,8,16,6,18,8,12,10
+// phi[p] = p - 1;
+// sqrt(n) <= phi[n] <= n - sqrt(n)  // except 2, 6
+// phi[n] is even for n > 2
+// ph[n^k] = n^(k - 1) * ph[n]
+// if (k >= 1)
+// p is prime. ph[p^k] = p^k - p^(k-1) = p^(k-1) * (p-1)  // important u can use primeFact
+// n = summation of ph[divisor1] + ph[divisor2] + .... ;
+// if a,b,c are pairwise coprimes, thedn
+// phi(a * b * c) = phi[a] * phi[b] * phi[c]
+
+
+int phi(int n) { 	// big o(n)
+    int ret = 0;
+    for (int i = 1 ; i <= n ; i++) {
+        if (__gcd(i, n) == 1)
+            ret++;
+    }
+    return ret;
+}
+
+int phi(int n) {  // big o(sqrt(n))
+    int result = n;
+    for (int i = 2; i * i <= n; i++) {
+        if (n % i == 0) {
+            while (n % i == 0)
+                n /= i;
+            result -= result / i;
+        }
+    }
+    if (n > 1)
+        result -= result / n;
+    return result;
+}
+
+
+// using sieve
+// big o(n * loglog n)
+
+void phi_1_to_n(int n) {
+    vector<int> phi(n + 1);
+    for (int i = 0; i <= n; i++)
+        phi[i] = i;
+
+    for (int i = 2; i <= n; i++) {
+        if (phi[i] == i) { 
+            for (int j = i; j <= n; j += i) 
+                phi[j] -= phi[j] / i;    // remove from rem not from j
+        }
+    }
+}
+
+
+// theive and divisor sum property
+// n = summation of ph[divisor1] + ph[divisor2] + .... ;
+void phi_1_to_n(int n) {
+    vector<int> phi(n + 1);
+    phi[0] = 0;
+    phi[1] = 1;
+    for (int i = 2; i <= n; i++)
+        phi[i] = i - 1;
+
+    for (int i = 2; i <= n; i++)
+        for (int j = 2 * i; j <= n; j += i)
+              phi[j] -= phi[i];
+}
+
+// ph(n!) = (n is prime) ? n - 1 : n ) * ph[(n-1)!);
+ll phi_factn(int n) {
+    ll ret = 1;
+    for (int i = 2 ; i <= n ; i++)
+        ret = ret * (isprime(i) ? i - 1 : i);
+    return ret;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Mobius function
+// m[1] = 1;
+// m[n] = 1 if (n is a square-free(prime factors is unique) with even number of prime factors
+// ex: m[2 * 3 * 5 * 7] = 1;
+// m[n] = -1 if (n is a square-free(prime factors is unique) with odd number of prime factors
+// ex: m[2 * 3 * 5] = -1;
+// m[n] = 0  if n has a redundant prime factor
+// ex: m[2 * 3 * 3 * 5] = 0;
+// in other way -> mu(n) = (-1)^k if n is the product of k different primes; otherwise mu(n) = 0.
+// seq = 1, -1, -1, 0, -1, 1, -1, 0, 0, 1, -1, 0, -1, 1, 1, 0
+
+int mobius(int n) {
+    int cnt = 0;
+    for (int i = 2 ; i * i <= n ; i++) {
+        if (n % i == 0) {
+            if (n % (i * i) == 0)
+                return 0; // if n has redundant p
+            n = n / i;
+            cnt++;
+        }
+    }
+    if (n != 1) cnt++;
+    if (cnt % 2 == 0) return 1;
+    else return -1;
+}
+// I can write seive also
+/////////////////////////////////////////////////////////////////////////////////////////
+// Mod Multiplicative Inverse
+// a / a === 1(% m)
+// ax === 1 (% m) IFF a , m coprimes -> gcd(a,m) = 1
+// return -1 means No answer
+// handle case x may be -
+ll modInverse(ll a, ll m) { // m prime or notprime
+    ll x , y;
+    ll gcd = extendedEuclid(a, m, x, y);
+    if (gcd != 1)
+        return -1; // No Answer
+    return (x + m) % m;
+}
+
+// Euler's theorem
+// if gcd(a, m) == 1 
+// then  a ^ phi[m] === 1 (mod m)
+// if m is prime  
+// then a ^ (m-1) === 1 (mod m)
+// a ^ (m - 2) === a^-1 (mod m)
+// a^-1 === a^(m-2) (mod m) if m is prime
+// Mod Multiplicative Inverse of x under (mod p) = (x ^ (p-2)) % p
+// so we use fpow(x, mod - 2, mod);
+
+ll modInversePrime(ll a, ll p) {
+    return fpow(a, p-2, p);
+}
+
+// ax == 1 (%m) IFF a , m coprimes else No answer
+ll modInversek(ll a, ll m) {
+    return fpow(a, phi(m) - 1, m);
+}
+
+// p is prime
+vi modInvRange(int p) {
+    vi inv(p - 1, 1);
+    for (int i = 2 ; i < p ; i++) 
+        inv[i] = (p - (p/i) * inv[p%i] % p) % p;
+    return inv;
+}
+///////////////////////////////////////////////////////////////////////////////////////////
+// return largest x such that p ^ x | n!
+ll countPrimeInFact(ll n , ll p) {
+    ll count = 0;
+    while(n) {
+        count += n / p;
+        n = n / p;
+    }
+    return count;
+}

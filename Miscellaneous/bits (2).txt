@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+using namespace std;
+/*
+ *   x   y   x&y   x|y   x^y   ~x
+ *   0   0    0     0     0    1
+ *   0   1    0     1     1    1
+ *   1   0    0     1     1    0
+ *   1   1    1     1     0    0
+ */
+
+//           num = 100111
+// (num>>3) = 100   ,  (num>>3) = num / 2^3
+// (num<<3) = 100111000  , (num<<3) = num * 2^3
+
+void printBinary(int number) {
+    string binary;
+    while(number) {
+        if (number & 1)
+            binary += '1';
+        else
+            binary += '0';
+        number = (number>>1); // or number = number/2
+    }
+    reverse(binary.begin(),binary.end());
+    cout<<binary<<endl;
+}
+
+// index -> 0 Base
+bool getBit(int num ,int index) {
+    // if num = 001101 and index = 2
+    // (num>>index) = 0011
+    // 0011 & 1 = 1
+    return (num>>index) & 1 ;
+}
+int setBit1(int num ,int index) {
+    // num = 101010 , index = 2
+    //  101010 | 000100 = 101110
+    return num | (1<<index);
+}
+int setBit0(int num ,int index) {
+    // num = 10100 , index = 2
+    // 10100 & ~(00100)
+    // 10100 & 11011  =  10000
+    return num & ~(1<<index);
+}
+int flipBit(int num , int index) {
+    // num = 1011 , index = 0
+    // 1011 ^ 0001 = 1010
+    return num ^ (1<<index);
+}
+int countNumOfBits1(int num) {
+    // return __builtin_popcount(num);  // this function can do it easily
+    int cnt = 0 ;
+    while(num) {
+        num = num & (num-1);  // x & (x-1)  first 1bit in x from right removed
+        cnt++;
+    }
+    return cnt;
+}
+void printAllSubSets(int len) { // big o ( 2^len * len)
+    for (int mask=0 ; mask<(1<<len) ; mask++) {
+        for (int index=0 ; index<len ; index++) {
+            if ( (mask & (1<<index)) != 0)
+                cout<<'1';
+            else
+                cout<<'0';
+        }
+        cout<<endl;
+    }
+}
+
+int main() {
+    
+}

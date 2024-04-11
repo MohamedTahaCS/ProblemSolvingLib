@@ -1,0 +1,49 @@
+struct SCC {
+    vector<vector<int>> adj, rev_adj;
+    vector<int> vis, comp;
+    int n, compNumbers;
+    stack<int> st;
+
+    SCC(vector<vector<int>> &g, int n) {
+        adj = g;
+        this -> n = n;
+        rev_adj.resize(n + 1);
+        vis.resize(n + 1);
+        comp.resize(n + 1);
+        compNumbers = 0;
+
+        for (int i = 1 ; i <= n ; i++) {
+            if (!vis[i]) dfs(i);
+        }
+
+        vis = vector<int> (n + 1);
+
+        while(!st.empty()) {
+            int s = st.top();
+            st.pop();
+
+            if (!vis[s]) {
+                dfs2(s);
+                compNumbers++;
+            }
+        }
+
+    }
+
+    void dfs(int s) {
+        vis[s] = true;
+        for (auto x : adj[s]) {
+            if (!vis[x]) dfs(x);
+            rev_adj[x].push_back(s);
+        }
+        st.push(s);
+    }
+
+    void dfs2(int s) {
+        vis[s] = true;
+        comp[s] = compNumbers;
+        for (auto x : rev_adj[s]) {
+            if (!vis[x]) dfs2(x);
+        }
+    }
+};

@@ -1,0 +1,59 @@
+					Lis nlogn  x<y<z
+vector<int> d(n+1, INT_MAX);
+    for (int i = 0; i < n; i++)
+    {
+        *lower_bound(d.begin() , d.end(), a[i]) = a[i];
+    }
+    for (int i = 0; i <= n; i++)
+    {
+        if (d[i] == INT_MAX)
+        {
+            cout << i << endl;
+            return 0;
+        }
+    }
+////////////////////////////////////
+struct IndexValueCompare
+{
+    inline bool operator() (const IndexValue &one, const IndexValue &another)
+    {
+        return one.second < another.second;
+    }
+};
+int LIS(const vector<int> &sequence)
+{
+    vector<int> parent(sequence.size());
+    set<IndexValue, IndexValueCompare> s;
+    for(int i = 0; i < sequence.size(); ++i)
+    {
+        IndexValue iv(i, sequence[i]);
+        if(i == 0){
+            s.insert(iv);
+            continue;
+        }
+        auto index = s.lower_bound(iv);
+        if(index != s.end())
+        {
+            if(sequence[i] < sequence[index->first])
+            {
+                if(index != s.begin()) {
+                    parent[i] = (--index)->first;
+                    index++;
+                }
+                s.erase(index);
+            }
+        } else{
+            parent[i] = s.rbegin()->first;
+        }
+        s.insert(iv);
+    }
+    return s.size() ;
+    vector<int> result(s.size());
+    int index = s.rbegin()->first;
+    for(auto iter = s.rbegin(); iter != s.rend(); index = parent[index], ++iter)
+    {
+        result[distance(iter, s.rend()) - 1] = index;
+    }
+  //  return result;
+}
+//////////////////////////////////////////////////////////////////////////////////////////////

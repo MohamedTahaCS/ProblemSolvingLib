@@ -1,0 +1,46 @@
+// x === rem[1] (% mod[1])
+// x === rem[2] (% mod[2])
+// x === rem[3] (% mod[3])
+// all mods are co-primes or Relatives   gcd of all pairs (i, j) == 1     IMPORTANT
+
+ll solveSystemOfCongruencesRelatives(vector<ll> &rems, vector<ll> &mods) {
+    ll prod = 1 , x = 0;
+    for (auto mod : mods) prod *= mod;
+    for (int i = 0 ; i < mods.size() ; i++) {
+        ll subProd = prod / mods[i];
+        x += (subProd * modInversek(subProd, mods[i])) % prod * rems[i];
+        x %= prod;
+    }
+    return x;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// x === rem[1] (% mod[1])
+// x === rem[2] (% mod[2])
+// x === rem[3] (% mod[3])
+// find x
+ 				General  solution
+// there is answer if rem[i] === rem[j] (% gcd(mod[i], mod[j]))
+// if we can solve 2 cong equation and merge in 1, we can solve sequentially
+// T = x mod N  -> T = x + N * K;
+// T = y mod M  -> T = y + M * P;
+// N * K - M * P = y - x   -> Linear Diophantine Equation
+
+ll solveSystemOfCongruencesNotRelatives(vector<ll> rems, vector<ll> mods) {
+    ll rem = rems[0], mod = mods[0];
+
+    // solve with prev equ, get new congruence equ
+    for (int i = 1 ; i < rems.size() ; i++) {
+        ll x , y , a = mod , b = -mods[i], c = rems[i] - rem;
+        ll g;
+        bool found = find_any_solution(a, b, c, x, y, g);
+
+        if (!found) return -1; // No Solution
+
+        rem += mod * x;
+        mod = mod / g * mods[i];
+        rem = (rem % mod + mod) % mod;
+    }
+    return rem;
+}
+///////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,41 @@
+vector<int> pp ;
+void sieve ()
+{
+    const int mx = 1e5+10 ;
+    vector <bool> prime(mx+1,true) ;
+    prime[0] = prime[1] = false ;
+    for (int i = 2; (long long)i*i <= mx; i++)
+    {
+        if (prime[i] )
+        {
+            for (int j = i * i; j <= mx; j += i) prime[j] = false ;
+        }
+    }
+    for (int i=0 ; i<mx ; i++)
+    {
+        if (prime[i]) pp.push_back(i) ;
+    }
+}
+void segsieve(int l , int r)
+{
+    if (l==1) l++ ;
+    int range = r-l+1 ;
+    vector<bool> prime (range ,false) ;
+    for (auto p:pp)
+    {
+        if (p*p<=r)
+        {
+            int i = (l/p)*p ;
+            if (i<l) i +=p ;
+            for ( ; i<=r ; i+=p)
+            {
+                if (i!=p) prime[i-l]=1 ;
+            }
+        }
+    }
+    for (int i=0 ; i<range ; i++)
+    {
+        if (prime[i]==0)
+            cout<<i+l<<endl ;
+    }
+}

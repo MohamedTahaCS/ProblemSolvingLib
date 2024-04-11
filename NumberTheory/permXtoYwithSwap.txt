@@ -1,0 +1,32 @@
+void dfs(int s, vi &vis, vvi &cycles, vvi &adj) {
+    if (vis[s]) return;
+    vis[s] = true;
+    cycles.back().push_back(s);
+    for (auto v : adj[s]) dfs(v, vis, cycles, adj);
+}
+
+// minimum swap to change permutation x to y
+int minSwap(vi x, vi y) {
+    int n = x.size();
+    vvi adj(n) , cycles;
+    vi id(n) , vis(n);
+
+    for (int i = 0 ; i < n ; i++) id[x[i]] = i;
+    for (int i = 0 ; i < n ; i++) {
+        if (x[i] != y[i]) {
+            adj[i].push_back(id[y[i]]);
+            adj[id[y[i]]].push_back(i);
+        }
+    }
+
+    for (int i = 0 ; i < n ; i++) {
+        if (!vis[i]) {
+            cycles.push_back(vi());
+            dfs(i, vis, cycles, adj);
+        }
+    }
+
+    int res = 0;
+    for (auto cycle : cycles) res += cycle.size() - 1;
+    return res;
+}

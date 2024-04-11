@@ -1,0 +1,110 @@
+//////////
+    for (int i = 1; i <= n; i++) distance[i] = INF;
+    distance[x] = 0;
+    for (int i = 1; i <= n-1; i++) {
+        for (auto e : edges) {
+            int a, b, w;
+            tie(a, b, w) = e;
+            distance[b] = min(distance[b], distance[a]+w);
+        }
+    }
+
+/////////
+
+#include <bits/stdc++.h>
+typedef long long ll;
+using namespace std ;
+ 
+void fast() {
+    ios_base::sync_with_stdio(false);
+    //freopen("input.txt", "r", stdin);
+    //freopen("output.txt", "w", stdout);
+}
+ 
+vector<vector<pair<int, int>>> adj;
+vector<int> vis;
+vector<int> isCycle;
+ 
+void dfs(int s) {
+    if (vis[s])
+        return ;
+ 
+    isCycle[s] = true;
+    vis[s] = true;
+    for (auto u : adj[s]) {
+        dfs(u.first);
+    }
+}
+int32_t main() {
+    fast();
+    int n , m ;
+    cin >> n >> m;
+    adj.resize(n + 1);
+    vis.resize(n + 1);
+    isCycle.resize(n + 1);
+    vector<vector<ll>> edges(m, vector<ll> (3));
+ 
+    for (auto &e : edges) {
+        cin >> e[0] >> e[1] >> e[2];
+        adj[e[0]].push_back({e[1], e[2]});
+    }
+ 
+    const ll inf = 1e18;
+    vector<ll> d (n + 1, -inf);
+ 
+    d[1] = 0;
+ 
+    for (int i = 1 ; i <= n  ; i++) {
+        for (auto &e : edges) {
+            if (d[e[0]] != -inf && d[e[0]] + e[2] > d[e[1]]) {
+                d[e[1]] = d[e[0]] + e[2];
+                if (i == n) // that node have cycle
+                    isCycle[e[1]] = true;
+            }
+        }
+    }
+ 
+    for (int i = 1; i <= n ; i++)
+        if (isCycle[i])
+            dfs(i);
+ 
+    if (isCycle[n])
+        cout <<"-1";
+    else
+        cout <<d[n];
+}
+//////////////////////////////////////////////////////////////////////////
+bool spfa(int s, vector<int>& d) 
+{
+    int n = adj.size();
+    d.assign(n, INF);
+    vector<int> cnt(n, 0);
+    vector<bool> inqueue(n, false);
+    queue<int> q;
+
+    d[s] = 0;
+    q.push(s);
+    inqueue[s] = true;
+    while (!q.empty()) {
+        int v = q.front();
+        q.pop();
+        inqueue[v] = false;
+
+        for (auto edge : adj[v]) {
+            int to = edge.first;
+            int len = edge.second;
+
+            if (d[v] + len < d[to]) {
+                d[to] = d[v] + len;
+                if (!inqueue[to]) {
+                    q.push(to);
+                    inqueue[to] = true;
+                    cnt[to]++;
+                    if (cnt[to] > n)
+                        return false;  // negative cycle
+                }
+            }
+        }
+    }
+    return true;
+}

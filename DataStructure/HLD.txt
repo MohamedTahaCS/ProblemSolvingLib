@@ -1,0 +1,52 @@
+// need segment tree here
+// this was for problem geting the max value in path between a , b nodes
+
+vector<vector<int>> adj;
+vector<int> nodeValue;
+vector<int> par, top, sz, depth, id;
+int currId = 0;
+ 
+int dfs(int s, int p) {
+    sz[s] = 1;
+    par[s] = p;
+    for (auto v : adj[s]) {
+        if (v == p) continue;
+        depth[v] = depth[s] + 1;
+        sz[s] += dfs(v, s);
+    }
+    return sz[s];
+}
+ 
+void hld_dfs(int s, int p, int tp) {
+    top[s] = tp;
+    id[s] = currId++;
+    update(id[s], nodeValue[s]);
+ 
+    int heavyChild = -1, heavyChildSize = -1;
+    for (int v : adj[s]) {
+        if (v == p) continue;
+        if (sz[v] > heavyChildSize) {
+            heavyChildSize = sz[v];
+            heavyChild = v;
+        }
+    }
+ 
+    if (heavyChild != -1) hld_dfs(heavyChild, s, tp);
+    for (int v : adj[s]) {
+        if (v == p || v == heavyChild) continue;
+        hld_dfs(v, s, v);
+    }
+}
+ 
+int query(int x, int y) {
+    int res = 0;
+    while(top[x] != top[y]) {
+        if (depth[top[x]] < depth[top[y]]) swap(x, y);
+        res = max(res, get(id[top[x]], id[x]));
+        x = par[top[x]];
+    }
+ 
+    if (depth[x] > depth[y]) swap(x, y);
+    res = max(res, get(id[x], id[y]));
+    return res;
+}

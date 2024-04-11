@@ -1,0 +1,22 @@
+ios::sync_with_stdio(0); 
+cin.tie(NULL);
+
+freopen("input.txt", "r", stdin);
+freopen("output.txt", "w", stdout);
+
+--------- Java ----------------
+BufferedReader br = new BufferedReader(new FileReader("input.txt"));
+PrintWriter pw=new PrintWriter(new BufferedWriter(new FileWriter("output.txt")));
+
+pw.flush();
+
+
+---------- Python --------------
+# Below is Python code for input/output
+ 
+import sys
+# For getting input from input.txt file
+sys.stdin = open('input.txt', 'r')
+ 
+# Printing the Output to output.txt file
+sys.stdout = open('output.txt', 'w')

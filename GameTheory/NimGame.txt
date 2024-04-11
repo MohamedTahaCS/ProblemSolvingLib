@@ -1,0 +1,61 @@
+Nim
+	N piles, remove from 1 pile, winner who can make that last move
+	just Xor them if xor = 0 then the first player lose
+	onther way -> for every column in base 2 for all piles check if sum divisible by 2
+		if true of all -> first player lose
+	{4 , 2 , 4} => [1 0 0] => first player win
+			   [0 1 0]
+			   [1 0 0]
+Misere Nim
+	N plies, remove from 1 pile, winner who make the last move
+	solution = Nim except if all piles <= 1 
+General Nim-K
+	Remove stones from any k piles
+	for every column in base 2 for all piles check if sum divisible by k + 1
+		if true of all -> first player lose
+
+Nim with Skips A , B: 
+	Remember move cancellation strategy
+	if A > B -> first Win
+	if B > A -> second win
+	if A = B -> answer is Nim
+
+Staircase Nim
+	staircase with n steps, each step has some coins
+	Move: move some coins to any left step(except first step)
+	Loser: can't make a move(all coins at arr[0])
+	intuition: Every step is a pile? No only odd positions
+	ans = Xor odd positions (the piles)	
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+// return true if the first player win
+
+void solve_nim(vector<int> heap) {
+  int xorsum = 0;
+  for (int i = 0; i < (int) heap.size(); ++i)
+    xorsum ^= heap[i];
+
+  if (xorsum != 0) {
+    cout << "First win: ";
+
+    for (int i = 0; i < (int) heap.size(); ++i) {
+      if (heap[i] > (heap[i] ^ xorsum)) {
+        cout << "First Move " << (heap[i] - (heap[i] ^ xorsum)) << " stones from " << i << " heap\n";
+        break;
+      }
+    }
+  } else
+    cout << "Second win\n";
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// return true if the first player win
+bool misereNim(vector<int> &piles) {
+  int isSpecial = 1, xorVal = 0;
+
+  for (int i = 0; i < piles.size(); ++i) {
+    xorVal ^= piles[i];
+    isSpecial &= (piles[i] <= 1);
+  }
+  if (isSpecial)
+    return xorVal == 0;
+  return xorVal != 0;  // normal nim handling
+}
