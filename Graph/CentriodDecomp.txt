@@ -1,0 +1,64 @@
+int n, k;
+const int N = 2e5 + 1;
+vector<int> adj[N];
+int subsize[N];
+bool finished[N];
+ 
+int ans = 0;
+ 
+int get_subtree_sizes(int s, int p) {
+    subsize[s] = 1;
+    for (int v : adj[s]) {
+        if (finished[v] || v == p) continue;
+        subsize[s] += get_subtree_sizes(v, s);
+    }
+    return subsize[s];
+}
+ 
+int centriod(int s, int p, int tarsz) {
+    for (int v : adj[s]) {
+        if (finished[v] || v == p) continue;
+        if (subsize[v] >= tarsz)
+            return centriod(v, s, tarsz);
+    }
+    return s;
+}
+ 
+int cnt[N];
+int mxdepth = 0;
+void dfs(int s, int p, int depth, bool mode) {
+    if (mode) {
+        cnt[depth]++;
+    } else {
+        if (k - depth >= 0)
+            ans += cnt[k - depth];
+    }
+    mxdepth = max(mxdepth, depth);
+    for (int v : adj[s]) {
+        if (finished[v] || v == p) continue;
+        dfs(v, s, depth + 1, mode);
+    }
+}
+ 
+void solve(int node) {
+    cnt[0] = 1;
+    mxdepth = 0;
+    for (int v : adj[node]) {
+        if (finished[v]) continue;
+        dfs(v, node, 1, 0);
+        dfs(v, node, 1, 1);
+    }
+    for (int i = 0 ; i <= mxdepth ; i++) cnt[i] = 0;
+}
+ 
+void divideAndConquer(int node) {
+    int mid = centriod(node, node, get_subtree_sizes(node, node) / 2);
+    finished[mid] = true;
+ 
+    solve(mid);
+ 
+    for (int v : adj[mid]) {
+        if (finished[v]) continue;
+        divideAndConquer(v);
+    }
+}

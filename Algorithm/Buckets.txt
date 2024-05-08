@@ -1,0 +1,47 @@
+const int block_size = 450;
+const int N = 2e5 + 1;
+const int lazy_size = N / block_size + 1;
+
+vector<int> v(N);
+
+int lazy[lazy_size];
+
+int start(int a) {
+    return a * block_size;
+}
+
+int end(int a) {
+    return (a + 1) * block_size - 1;
+}
+
+void push_down(int a) {
+    // write code
+    for (int i = start(a) ; i <= end(a) && i < v.size() ; i++) {
+
+    }
+    // clear lazy 
+}
+
+void update(int l, int r) {
+    int a = l / block_size;
+    int b = r / block_size;
+
+    if (a == b) {
+        push_down(a);
+
+        for (int i = l ; i <= r ; i++) {
+            // write code
+        }
+    }
+    else {
+        update(l, end(a));
+
+        // update lazy for all buckets between a , b
+        for (int c = a + 1 ; c < b ; c++) {
+            // update it in o(1) or log
+            // write code:
+        }
+
+        update(start(b), r);
+    }
+}

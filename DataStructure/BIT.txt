@@ -1,42 +1,143 @@
-// 1 Base
 struct BIT {
-    vector<ll> bit;
-    ll n;
+    // 1 base
+    // lsb -> least significant bit
+    // each index store value of this range [i, i - (1<<lsb(idx))[
 
-    BIT(vector<ll> v) {
-        this-> n = v.size();
+    vector<int> bit;
+ 
+    BIT(int n) {
         bit.resize(n + 1);
-        for (int i = 0 ; i < v.size() ; i++)
-            add(i + 1, v[i]);
     }
-
-    ll lsb(ll pos) {
-        return pos & -pos;
+ 
+    int g(int i) {
+        for (int b = 0 ; b < 32 ; b++) {
+            if (i & (1 << b)) return (1 << b);
+        }
+        // both return are valid (equiv)
+        return i & -i;
     }
-
-    void add(ll pos, ll value) {
-        while(pos <= n) {
-            bit[pos] += value;
-            pos += lsb(pos);
+ 
+    int sum(int i) {     
+        int res = 0;
+        while(i) {
+            res += bit[i];
+            i -= g(i);
+        }
+        return res;
+    }
+     
+    void increase(int i, int delta) {
+        while(i < bit.size()) {
+            bit[i] += delta;
+            i += g(i);
         }
     }
-
-    ll prefix(int pos) {
-        ll ret = 0;
-        while(pos > 0) {
-            ret += bit[pos];
-            pos -= lsb(pos);
-        }
-        return ret;
-    }
-
-    ll value(ll l, ll r) {
-        return prefix(r) - prefix(l - 1);
+     
+    int get(int l, int r) {
+        return sum(r) - sum(l - 1);
     }
 };
 
-
 //////////////////////////////////////////////////////////
+struct BIT_2D {
+    vector<vector<int>> bit;
+ 
+    BIT_2D(int n, int m) {
+        bit.resize(n + 1, vector<int> (m + 1));
+    }
+ 
+    int g(int i) {
+        // for (int b = 0 ; b < 32 ; b++) {
+        //     if (i & (1 << b)) return (1 << b);
+        // }
+        // both return are valid
+        return i & -i;
+    }
+ 
+    int sum(int r, int c) {     
+        int res = 0;
+        for (int i = r ; i ; i -= g(i)) {
+            for (int j = c ; j ; j -= g(j)) {
+                res += bit[i][j];
+            }
+        }
+        return res;
+    }
+
+    void increase(int r, int c, int delta) {
+        for (int i = r ; i < bit.size() ; i += g(i)) {
+            for (int j = c ; j < bit[i].size() ; j += g(j)) {
+                bit[i][j] += delta;
+            }
+        }
+    }
+
+    int get(int r, int c, int r2, int c2) {
+        return sum(r2, c2) - sum(r-1, c2) - sum(r2, c-1) + sum(r-1, c-1);
+    }
+};
+//////////////////////////////////////////////////////////
+// sprase bit2d
+
+int comp(pair<int,int> &a, pair<int,int> &b) {
+    return a.second < b.second;
+}
+struct BIT_2D {
+    vector<vector<int>> bit;
+    vector<vector<int>> vec;
+ 
+    BIT_2D(int n, vector<pair<int,int>> p) {
+        sort(p.begin(), p.end(), comp);
+        vec.resize(n + 1);
+ 
+        for (int i = 0 ; i <= n ; i++) vec[i].push_back(0);
+        for (auto [x, y] : p) {
+            for ( ; x <= n ; x += g(x)) {
+                vec[x].push_back(y);
+            }
+        }
+ 
+        bit.resize(n + 1);
+        for (int i = 0 ; i <= n ; i++) {
+            bit[i].resize(vec[i].size());
+        }
+    }
+ 
+    int pos(int r, int y) {
+        return upper_bound(vec[r].begin(), vec[r].end(), y) - vec[r].begin() - 1;
+    }
+ 
+    int g(int i) {
+        // for (int b = 0 ; b < 32 ; b++) {
+        //     if (i & (1 << b)) return (1 << b);
+        // }
+        // both return are valid
+        return i & -i;
+    }
+ 
+ 
+ 
+    int get(int r, int c) {     
+        int res = 0;
+        
+        for (int i = r ; i ; i -= g(i)) {
+            for (int j = pos(i, c) ; j ; j -= g(j)) {
+                res = max(res, bit[i][j]);
+            }
+        }
+        return res;
+    }
+ 
+    void update(int r, int c, int delta) {
+        for (int i = r ; i < bit.size() ; i += g(i)) {
+            for (int j = pos(i, c) ; j < bit[i].size() ; j += g(j)) {
+                bit[i][j] = max(bit[i][j], delta);
+            }
+        }
+    }
+ 
+}; 
+///////////////////////////////////////////////////////////
 // binary indexed tree -> 0 Base
 struct BIT {
     vector<ll> bit;
@@ -70,44 +171,6 @@ struct BIT {
 };
 
 ////////////////////////////////////////////////////////////////
-// 0base
-template<class T> struct fenwick_tree {
-    vector<T> bit;
-    int n;
-
-    fenwick_tree(int _n) {
-        init(_n);
-    }
-
-    void init(int _n) {
-        n = _n;
-        bit.assign(n, 0);
-    }
-
-    fenwick_tree(vector<int> a) : fenwick_tree(a.size()) {
-        for (size_t i = 0; i < a.size(); i++)
-            add(i, a[i]);
-    }
-
-    T prefix(int p) {
-        T res = 0;
-        for (; p >= 0; p = (p & (p + 1)) - 1)
-            res += bit[p];
-        return res;
-    }
-
-    T sum(int l, int r) {
-        return prefix(r) - prefix(l - 1);
-    }
-
-    void add(int p, int x) {
-        for (; p < n; p = p | (p + 1))
-            bit[p] += x;
-    }
-};
-
-////////////////////////////////
-
 // 0 base 
 struct FenwickTree2D {
     vector<vector<int>> bit;
@@ -138,6 +201,4 @@ struct FenwickTree2D {
                 bit[i][j] += delta;
     }
 };
-
-
 // return sum(r2,c2) - sum(r1 - 1,c2) - sum(r2,c1-1) + sum(r1-1,c1-1);
