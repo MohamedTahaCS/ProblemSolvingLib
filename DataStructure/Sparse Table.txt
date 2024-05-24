@@ -1,9 +1,8 @@
-class sparseTable {
-public:
+struct SparseTable {
     vector<vector<int>> spt;
     int maxlog;
 
-    sparseTable(vector<int> vec) {
+    SparseTable(vector<int> vec) {
         maxlog = log2(vec.size());
 
         spt.resize(maxlog + 1, vector<int>(vec.size()));
@@ -35,4 +34,4 @@ public:
     }
 };
 // 0 base -> (l,r)
-// sparseTable spt (vec);
+// SparseTable spt (vec);

@@ -1,0 +1,49 @@
+struct MergeSortTree {
+    vector<vector<int>> t;
+    int n;
+
+    MergeSortTree(vector<int> &v) {
+        this -> n = v.size();
+        t.resize(4 * n);
+        build(v, 0, n - 1);
+    }
+
+    vector<int> merge(vector<int> &a, vector<int> &b) {
+        vector<int> res;
+        int i = 0 , j = 0;
+        while(i < a.size() and j < b.size()) {
+            if (a[i] < b[j]) res.emplace_back(a[i++]);
+            else res.emplace_back(b[j++]);
+        }
+        while(i < a.size()) res.emplace_back(a[i++]);
+        while(j < b.size()) res.emplace_back(b[j++]);
+        return res;
+    }
+
+    void build(vector<int> &v, int nl, int nr, int k = 1) {
+        if (nl == nr) {
+            t[k].push_back(v[nl]);
+            return;
+        }
+
+        int mid = (nl + nr) / 2;
+        build(v, nl, mid, 2 * k);
+        build(v, mid + 1, nr, 2 * k + 1);
+        t[k] = merge(t[2 * k], t[2 * k + 1]);
+    }
+
+    int get(int l, int r, int tar) {
+        return get(l, r, tar, 0, n - 1);
+    }
+
+    int get(int l, int r, int tar, int nl, int nr, int k = 1) {
+        if (nl > r || nr < l) return 0; // out
+
+        if (nl >= l && nr <= r) {
+            return t[k].size() - (upper_bound(t[k].begin(), t[k].end(), tar) - t[k].begin());
+        }
+
+        int mid = (nl + nr) / 2;
+        return get(l, r, tar, nl, mid, 2 * k) + get(l, r, tar, mid + 1, nr, 2 * k + 1);
+    }
+};

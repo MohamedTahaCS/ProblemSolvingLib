@@ -1,0 +1,64 @@
+struct SCC {
+    int n, comp_num;
+    vector<vector<int>> adj, rev_adj;
+    vector<bool> vis;
+    vector<int> id;
+    stack<int> st;
+
+    SCC(vector<vector<int>> &adj, int n) {
+        this->n = n;
+        this->adj = adj;
+        rev_adj.resize(n + 1);
+        vis.resize(n + 1);
+        id.resize(n + 1);
+        comp_num = 0;
+        
+        for (int i = 1 ; i <= n ; i++) {
+            if (!vis[i]) {
+                dfs(i, 1);
+            }
+        }
+
+        vis = vector<bool> (n + 1);
+
+        while(!st.empty()) {
+            int x = st.top();
+            if (!vis[x]) {
+                comp_num++;
+                dfs(x, 2);
+            }
+            st.pop();
+        }
+    }
+
+    void dfs(int s, int path) {
+        vis[s] = true;
+        vector<int> &childs = (path == 1) ? adj[s] : rev_adj[s];
+        for (auto v : childs) {
+            if (path == 1) rev_adj[v].push_back(s);
+            if (!vis[v]) {
+                dfs(v, path);
+            }
+        }
+        if (path == 1) st.push(s);
+        if (path == 2) id[s] = comp_num;
+    }
+
+    vector<vector<int>> get_scc_graph() {
+        vector<vector<int>> scc_adj(comp_num + 1);
+        set<int> edges[comp_num + 1];
+        for (int i = 1 ; i <= n ; i++) {
+            for (auto j : adj[i]) {
+                int a = id[i];
+                int b = id[j];
+                if (a != b) {
+                    if (!edges[a].count(b)) {
+                        edges[a].insert(b);
+                        scc_adj[a].push_back(b);
+                    }
+                }
+            }
+        }
+        return scc_adj;
+    }
+};
