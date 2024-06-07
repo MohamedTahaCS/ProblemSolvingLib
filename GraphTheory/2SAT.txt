@@ -1,8 +1,9 @@
+// zero base
 struct two_sat {
     int n;
     vector<vector<int>> g, gr; // gr is the reversed graph
-    vector<int> comp, topological_order, answer; // comp[v]: ID of the SCC containing node v
-    vector<bool> vis;
+    vector<int> comp, topological_order; // comp[v]: ID of the SCC containing node v
+    vector<bool> vis, answer;
 
     two_sat() {}
 
@@ -27,26 +28,38 @@ struct two_sat {
     // int x, bool val: if 'val' is true, we take the variable to be x. Otherwise we take it to be x's complement.
 
     // add condition (x -> y) if x true then y also true
-    void add_implication(int i, bool f, int j, bool g) {
-        add_edge(i + (f ? 0 : n), j + (g ? 0 : n));
-        add_edge(j + (g ? n : 0), i + (f ? n : 0));
+    void add_implication(int x, bool f, int y, bool g) {
+        add_edge(x * 2 + (f? 0 : 1), y * 2 + (g? 0 : 1));
+        add_edge(y * 2 + (g? 1 : 0), x * 2 + (f? 1 : 0));
     }
 
     // At least one of them is true
-    void add_clause_or(int i, bool f, int j, bool g) {
-        add_edge(i + (f ? n : 0), j + (g ? 0 : n));
-        add_edge(j + (g ? n : 0), i + (f ? 0 : n));
+    void add_clause_or(int x, bool f, int y, bool g) {
+        add_edge(x * 2 + (f? 1 : 0), y * 2 + (g? 0 : 1));
+        add_edge(y * 2 + (g? 1 : 0), x * 2 + (f? 0 : 1));
     }
 
     // Only one of them is true
-    void add_clause_xor(int i, bool f, int j, bool g) {
-        add_clause_or(i, f, j, g);
-        add_clause_or(i, !f, j, !g);
+    void add_clause_xor(int x, bool f, int y, bool g) {
+        add_clause_or(x, f, y, g);
+        add_clause_or(x, !f, y, !g);
     }
 
     // Both of them have the same value
-    void add_clause_and(int i, bool f, int j, bool g) {
-        add_clause_xor(i, !f, j, g);
+    void add_clause_and(int x, bool f, int y, bool g) {
+        add_clause_xor(x, !f, y, g);
+    }
+
+    // optional
+    int add_var() {
+        for (int i = 1 ; i <= 2 ; i++) {
+            g.push_back(vector<int>());
+            gr.push_back(vector<int>());
+            answer.push_back(0);
+            comp.push_back(0);
+            vis.push_back(0);
+        }
+        return n++;
     }
 
     // Topological sort
@@ -84,14 +97,13 @@ struct two_sat {
 
         // Constructing the answer
         for (int i = 0; i < n; i++) {
-            if (comp[i] == comp[i + n]) return false;
-            answer[i] = (comp[i] > comp[i + n] ? 1 : 0);
+            if (comp[2 * i] == comp[2 * i + 1]) return false;
+            answer[i] = (comp[2 * i] > comp[2 * i + 1] ? 1 : 0);
         }
 
         return true;
     }
 };
-
 
 // (x∨y)⟺((¬x⇒y)∧(¬y⇒x))  // so you add to edges for each clause
 // 1. Forcing a variable to be true

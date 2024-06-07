@@ -1,4 +1,76 @@
 					String Hashing
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+				Substring Hashing in O(1)
+struct Hash {
+    int n, p, m;
+    string s;
+    vector<int> dp[2], inv[2];
+ 
+    Hash() {}
+    Hash(string s, int p = 31, int m = 1e9 + 7) {
+        this->n = s.size();
+        this->p = p;
+        this->m = m;
+        this->s = s;
+ 
+        for (bool f : {0, 1}) {
+            dp[f].resize(n);
+            inv[f].resize(n);
+            int hash_val = 0 , p_val = 1;
+            for (int i=0; i < n ; i++) {
+                int idx = (f? n - i - 1 : i);
+                hash_val = ( hash_val + (s[idx] - 'a' + 1) * p_val )%m ;
+                dp[f][i] = hash_val ; 
+                inv[f][i] = power(p_val,m-2) ;
+                p_val = (p_val * p) %m ;
+            }
+        }
+    }
+ 
+    int power(int a, int b) {
+        a %= m;
+        ll res = 1;
+        while(b) {
+            if (b & 1) res = res * a % m;
+            a = a * a % m;
+            b >>= 1; 
+        }
+        return res;
+    }
+ 
+    int get(int l , int r, bool f = 0) {
+        int res = dp[f][r];
+        if (l) res = (res - dp[f][l-1]) % m;
+        res = (res + m) % m;
+        res = (res * inv[f][l]) % m ;
+        return res;
+    }
+ 
+    int get_rev(int l, int r) {
+        int len = r - l + 1;
+        return get(n - 1 - l - (len - 1), n - 1 - l, true);
+    }
+};
+ 
+struct DoubleHash {
+    Hash x , y;
+    DoubleHash() {}
+    DoubleHash(string s) {
+        x = Hash(s);
+        y = Hash(s, 29, 1e9 + 9);
+    }
+ 
+    pair<int,int> get(int l, int r) {
+        return {x.get(l, r), y.get(l, r)};
+    }
+ 
+    pair<int,int> get_rev(int l, int r) {
+        return {x.get_rev(l, r), y.get_rev(l, r)};
+    }
+};
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 // int shout be long long 
 int comput_hash(string const& s)
 {
@@ -29,39 +101,7 @@ vector< vector<int> > group_same_strings(vector<string> const& s)//n*m+logn hash
     return groups ; 
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////
-				Substring Hashing in O(1)
-struct Hash {
-    int p = 31, m = 1e9 + 7;
-    int dp[1000001] , inv[1000001] ;
- 
-    Hash() {}
-    Hash(int p, int m) {
-        this-> p = p;
-        this-> m = m;
-    }
- 
-    int comput_hash(string const& s)
-    {
-        int hash_val = 0 , p_val=1 ;
-        for (int i=0; i<s.size() ; i++)
-        {
-            hash_val = ( hash_val + (s[i]-'a'+1) * p_val )%m ;
-            dp[i]=hash_val ; inv[i]=fpow(p_val,m-2,m) ;
-            p_val = (p_val * p) %m ;
-        }
-        return hash_val ;
-    }
- 
-    int rangehash(int l , int r)
-    {
-        int res = dp[r] ;
-        if (l!=0) res = (res - dp[l-1]+m)%m ;
-        res = (res * inv[l])%m ;
-        return res ;
-    }
-};
-Hash h1;
-Hash h2(29, 1e9 + 9);
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 		Determine the number of different substrings in a string  big o(n^2 * logn
 int count_unique_substrings(string const& s) {
