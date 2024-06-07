@@ -1,10 +1,11 @@
+//--------------------------------------------------------//
 using Matrix = vector<vector<long long>>;
 const int MOD = 1e9 + 7;
- 
+
 Matrix zero(int n) {
     return Matrix(n, vector<long long>(n));
 }
- 
+
 Matrix mult(Matrix a, Matrix b) {
     int n = a.size();
     Matrix res = zero(n);
@@ -18,14 +19,14 @@ Matrix mult(Matrix a, Matrix b) {
     }
     return res;
 }
- 
+
 Matrix identity(int n) {
     Matrix res = zero(n);
     for (int i = 0 ; i < n ; i++) 
         res[i][i] = 1;
     return res;
 }
- 
+
 Matrix power(Matrix &a, ll k) {
     int n = a.size();
     if (k == 0) return identity(n);
@@ -34,13 +35,14 @@ Matrix power(Matrix &a, ll k) {
     if (k & 1) return mult(a, mult(res, res));
     return mult(res, res);
 }
- 
+
 void print(Matrix a) {
     for (auto row : a) {
         for (auto x : row) cout << x <<" ";
         cout << endl;
     }
 }
+//--------------------------------------------------------//
  
 // example
 // Matrix init = {{0, 1}, {0, 0}};
@@ -50,24 +52,25 @@ void print(Matrix a) {
 // Maximum grid will be atmost 100 * 100 size
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-matrix add(matrix a, matrix b) {
-    matrix res = zero(a.size(), a[0].size());
-    lp(i, a.size()) {
-        lp(j, a[0].size()) {
-            res[i][j] = a[i][j] + b[i][j];
-        }
-    }
+Matrix add(Matrix a, Matrix b) {
+    int n = a.size();
+    Matrix res = zero(n);
+    for (int i = 0 ; i < n ; i++)
+        for (int j = 0 ; j < n ; j++) 
+            res[i][j] = (res[i][j] + (a[i][j] + b[i][j]) % MOD) % MOD;
     return res;
 }
-/////////////////////////////////
-matrix powersSum(matrix x, ll k) { // x^1 + x^2 + .. + x^k
-    if (k == 0) return zero(x.size(), x[0].size());
-    matrix subRes = powersSum(x, k / 2);
-    matrix res = multiply(subRes, pow(x, k/2));
+
+Matrix power_sum(Matrix &x, ll k) { // x^1 + x^2 + .. + x^k
+    int n = x.size();
+    if (k == 0) return zero(n);
+    Matrix subRes = power_sum(x, k / 2);
+    Matrix res = mult(subRes, power(x, k/2));
     res = add(res, subRes);
-    if (k & 1) res = add(res, pow(x, k));
+    if (k & 1) res = add(res, power(x, k));
     return res;
 }
+
 /////////////////////////////////
 ll matrixTrace(matrix x) {
     ll ret = 0;
