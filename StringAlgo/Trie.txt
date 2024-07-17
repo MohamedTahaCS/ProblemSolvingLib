@@ -1,25 +1,38 @@
 const int K = 26;
 struct Node {
-    int next[K];
-    bool leaf = false;
+    int to[K];
+    int stop;
     Node() {
-        memset(next, -1, sizeof next);
+        memset(to, -1, sizeof to);
+        stop = 0;
     }
 };
-vector<Node> trie(1);
- 
-void add(string s) {
-    int i = 0;
-    for (auto ch : s) {
-        int c = ch - 'a';
-        if (trie[i].next[c] == -1) {
-            trie[i].next[c] = (int) trie.size();
-            trie.emplace_back();
+
+struct Trie {
+    vector<Node> t;
+
+    Trie() { t.push_back(Node()); }
+
+    void insert(string s) {
+        int node = 0;
+        for (auto ch : s) {
+            int c = ch - 'a';
+            if (t[node].to[c] == -1) {
+                t[node].to[c] = t.size();
+                t.push_back(Node());
+            }
+            node = t[node].to[c];
         }
-        i = trie[i].next[c];
+        t[node].stop++;
     }
-    trie[i].leaf = true;
-}
+
+    int go_step(int node_idx, char ch) {
+        int c = ch - 'a';
+        if (t[node_idx].to[c] == 0) return -1;
+        return t[node_idx].to[c];
+    }
+};
+///////////////////////////////////////////////////
  
 bool prefixExist(string s) {
     int i = 0;

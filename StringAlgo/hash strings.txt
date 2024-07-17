@@ -2,87 +2,111 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 				Substring Hashing in O(1)
 struct Hash {
-    int n, p, m;
-    string s;
-    vector<int> dp[2], inv[2];
+    ll n, p, m;
+    vector<ll> dp[2];
+    vector<ll> inv, p_pow;
  
     Hash() {}
-    Hash(string s, int p = 31, int m = 1e9 + 7) {
-        this->n = s.size();
-        this->p = p;
-        this->m = m;
-        this->s = s;
+    Hash(string& s, ll p = 9973, ll m = 1e9 + 9) : n(s.size()), p(p), m(m), inv(n), p_pow(n) {
+        p_pow[0] = 1;
+        for (int i = 1; i < n; ++i) p_pow[i] = p_pow[i - 1] * p % m;
+        inv[n - 1] = power(p_pow[n - 1], m - 2);
+        for (int i = n - 2; i >= 0; --i) inv[i] = inv[i + 1] * p % m;
  
-        for (bool f : {0, 1}) {
+        for (int f : {0, 1}) { // 0 only if reverse not matter
             dp[f].resize(n);
-            inv[f].resize(n);
-            int hash_val = 0 , p_val = 1;
-            for (int i=0; i < n ; i++) {
-                int idx = (f? n - i - 1 : i);
-                hash_val = ( hash_val + (s[idx] - 'a' + 1) * p_val )%m ;
-                dp[f][i] = hash_val ; 
-                inv[f][i] = power(p_val,m-2) ;
-                p_val = (p_val * p) %m ;
+            for (ll hash_val = 0, i = 0; i < n; ++i) {
+                int idx = f ? n - i - 1 : i;
+                dp[f][i] = hash_val = (hash_val + s[idx] * p_pow[i] % m) % m;
             }
         }
     }
  
-    int power(int a, int b) {
-        a %= m;
-        ll res = 1;
-        while(b) {
-            if (b & 1) res = res * a % m;
-            a = a * a % m;
-            b >>= 1; 
-        }
-        return res;
+    ll power(ll a, ll b) {
+        if (b == 0) return 1;
+        if (b & 1) return power(a, b - 1) * a % m;
+        ll res = power(a, b/2);
+        return res * res % m;
     }
  
-    int get(int l , int r, bool f = 0) {
-        int res = dp[f][r];
-        if (l) res = (res - dp[f][l-1]) % m;
-        res = (res + m) % m;
-        res = (res * inv[f][l]) % m ;
-        return res;
+    ll get(int l, int r, bool f = 0) {
+        ll res = dp[f][r] % m;
+        if (l > 0) res = ((res - dp[f][l - 1])%m + m) % m;
+	    if (res < 0) res += m;
+        return res * inv[l] % m;
     }
  
-    int get_rev(int l, int r) {
-        int len = r - l + 1;
-        return get(n - 1 - l - (len - 1), n - 1 - l, true);
+    ll get_rev(int l, int r) {
+        return get(n - 1 - r, n - 1 - l, 1);
     }
 };
  
 struct DoubleHash {
-    Hash x , y;
-    DoubleHash() {}
-    DoubleHash(string s) {
-        x = Hash(s);
-        y = Hash(s, 29, 1e9 + 9);
-    }
+    Hash x, y;
  
-    pair<int,int> get(int l, int r) {
+    DoubleHash() {}
+    DoubleHash(string& s) : x(s, 31, 1e9 + 7), y(s, 29, 1e9 + 9) {}
+ 
+    pair<ll, ll> get(int l, int r) {
         return {x.get(l, r), y.get(l, r)};
     }
  
-    pair<int,int> get_rev(int l, int r) {
+    pair<ll, ll> get_rev(int l, int r) {
         return {x.get_rev(l, r), y.get_rev(l, r)};
     }
 };
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+// with change idx 
+struct Hash {
+    ll n, p, m;
+    BIT dp[2]; // bit should be zero base
+    vector<ll> inv, p_pow;
+ 
+    Hash() {}
+    Hash(string& s, ll p = 9973, ll m = 1e9 + 9) : p(p), m(m), n(s.size()), inv(n) {
+        p_pow.resize(n, 1);
+        for (int i = 1; i < n; ++i) p_pow[i] = p_pow[i - 1] * p % m;
+        inv[n - 1] = power(p_pow[n - 1], m - 2);
+        for (int i = n - 2; i >= 0; --i) inv[i] = inv[i + 1] * p % m;
+ 
+        for (int f : {0, 1}) { // 0 only if reverse not matter
+            dp[f] = BIT(n);
+            for (ll hash_val = 0, i = 0; i < n; ++i) {
+                int idx = f ? n - i - 1 : i;
+                dp[f].add(i, s[idx] * p_pow[i] % m);
+            }
+        }
+    }
+ 
+    void change_char(int i, char ch) {
+        for (int f : {0, 1}) {
+            int idx = f ? n - i - 1 : i;
+            dp[f].add(idx, -1 * dp[f].getValue(idx, idx));
+            dp[f].add(idx, ch * p_pow[idx] % m);
+        }
+    }
+ 
+    ll power(ll a, ll b) {
+        if (b == 0) return 1;
+        if (b & 1) return power(a, b - 1) * a % m;
+        ll res = power(a, b/2);
+        return res * res % m;
+    }
+ 
+    ll get(int l, int r, bool f = 0) {
+        ll res = dp[f].prefix(r);
+        if (l > 0) res = ((res - dp[f].prefix(l - 1))%m + m) % m;
+	if (res < 0) res += m;
+        return res * inv[l] % m;
+    }
+ 
+    ll get_rev(int l, int r) {
+        return get(n - 1 - r, n - 1 - l, 1);
+    }
+};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
-// int shout be long long 
-int comput_hash(string const& s)
-{
-    const int p=31 , m = 1e9+9 ;
-    int hash_val = 0 , p_val=1 ;
-    for (char c:s)
-    {
-        hash_val = ( hash_val + (c-'a'+1) * p_val )%m ;
-        p_val = (p_val * p) %m ;
-    }
-    return hash_val ;
-}
 vector< vector<int> > group_same_strings(vector<string> const& s)//n*m+logn hash.first should LL
 {
     int n = s.size() ;

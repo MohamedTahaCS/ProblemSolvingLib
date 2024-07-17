@@ -1,0 +1,78 @@
+struct Node {
+    int value;
+    int pri;
+    int sz;
+    int sum;
+    bool lazy;
+    Node* c[2];
+ 
+    Node(int v, int s) {
+        value = v;
+        sum = s;
+        sz = 1;
+        lazy = false;
+        pri = rand();
+        c[0] = c[1] = NULL;
+    }
+ 
+    void push_down() {
+        if (!lazy) return;
+        swap(c[0], c[1]);
+        if (c[0]) c[0]->lazy ^= 1;
+        if (c[1]) c[1]->lazy ^= 1;
+        lazy = 0;
+    }
+};
+ 
+int sum(Node* x) {
+    return (x) ? x->sum : 0;
+}
+ 
+int size(Node* x) {
+    return (x) ? x->sz : 0;
+}
+ 
+Node* merge(Node* l, Node* r) {
+    if (!l) return r;
+    if (!r) return l;
+    l->push_down();
+    r->push_down();
+    if (l->pri > r->pri) {
+        l->c[1] = merge(l->c[1], r);
+        l->sum = sum(l->c[0]) + sum(l->c[1]) + l->value;
+        l->sz = size(l->c[0]) + size(l->c[1]) + 1;
+        return l;
+    } else {
+        r->c[0] = merge(l, r->c[0]);
+        r->sum = sum(r->c[0]) + sum(r->c[1]) + r->value;
+        r->sz = size(r->c[0]) + size(r->c[1]) + 1;
+        return r;
+    }
+}
+ 
+pair<Node*, Node*> split(Node* t, int len) {
+    if (!t) return {t, t};
+    t->push_down();
+    if (size(t->c[0]) < len) {
+        auto p = split(t->c[1], len - size(t->c[0]) - 1);
+        t->c[1] = p.first;
+        t->sz = size(t->c[0]) + size(t->c[1]) + 1;
+        t->sum = sum(t->c[0]) + sum(t->c[1]) + t->value;
+        return {t, p.second};
+    } else {
+        auto p = split(t->c[0], len);
+        t->c[0] = p.second;
+        t->sz = size(t->c[0]) + size(t->c[1]) + 1;
+        t->sum = sum(t->c[0]) + sum(t->c[1]) + t->value;
+        return {p.first, t};
+    }
+}
+ 
+ 
+void dfs(Node* x) {
+    if (!x) return;
+    x->push_down();
+    dfs(x->c[0]);
+    cout << x->value <<" ";
+    dfs(x->c[1]);
+}

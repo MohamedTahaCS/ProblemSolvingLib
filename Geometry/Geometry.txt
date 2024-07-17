@@ -1,0 +1,100 @@
+struct Point {
+    int x, y;
+    Point() {}
+    Point(int x, int y) { this->x = x; this->y = y; }
+    void print() { cout << x <<" " << y << endl; }
+};
+ 
+struct G {
+    // line p1 ----> p2  check p3
+    int orientation(Point p1, Point p2, Point p3) {
+        int slop1 = (p2.y - p1.y) * (p3.x - p1.x);
+        int slop2 = (p3.y - p1.y) * (p2.x - p1.x);
+        if (slop1 == slop2) return 0; // p1, p2, p3 are collinear
+        if (slop1 > slop2) return 1; // Clockwise (right)
+        else return 2; // Counterclockwise (left)
+    }
+ 
+    // segment p1 ---- p2 check p3
+    bool on_segment(Point p1, Point p2, Point p3) {
+        if (orientation(p1, p2, p3) != 0) return false;
+        if (p3.x >= min(p1.x, p2.x) and p3.x <= max(p1.x, p2.x) and
+            p3.y >= min(p1.y, p2.y) and p3.y <= max(p1.y, p2.y))
+            return true;
+        return false;
+    }
+ 
+    // segment p1---p2 and p3---p4
+    bool intersect(Point p1, Point p2, Point p3, Point p4) {
+        if (on_segment(p1, p2, p3)) return true;
+        if (on_segment(p1, p2, p4)) return true;
+        if (on_segment(p3, p4, p1)) return true;
+        if (on_segment(p3, p4, p2)) return true;
+        int o1 = orientation(p1, p2, p3);
+        int o2 = orientation(p1, p2, p4);
+        int o3 = orientation(p3, p4, p1);
+        int o4 = orientation(p3, p4, p2);
+        if (o1 != o2 and o3 != o4) return true;      
+        return false;
+    }
+
+    int distSq(Point p1, Point p2) {
+        return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
+    }
+
+    vector<Point> convexHull(vector<Point> points) {
+        sort(points.begin(), points.end(), [](Point a, Point b) {
+            return make_pair(a.x, a.y) < make_pair(b.x, b.y);
+        });
+        vector<Point> hull;
+        for (int step = 1 ; step <= 2 ; step++) {
+            int sz = hull.size();
+            for (Point c : points) {
+                while((int) hull.size() - sz >= 2) {
+                    Point a = hull[(int) hull.size() - 2];
+                    Point b = hull[(int) hull.size() - 1];
+                    // a b c should be clock wise
+                    if (orientation(a, b, c) <= 1) break;
+                    hull.pop_back(); // remove b
+                }
+                hull.push_back(c);
+            }
+            hull.pop_back(); // remove rightmost point
+            reverse(points.begin(), points.end());
+        }
+        
+        return hull;
+    }
+
+    int get_area(vector<Point> points) {
+        int n = points.size();
+        int res = 0;
+        for (int i = 0 ; i < n ; i++) {
+            Point p1 = points[i];
+            Point p2 = points[(i + 1) % n];
+            res += p1.x * p2.y - p2.x * p1.y;
+        }
+        res = abs(res);
+        return res / 2;
+        return res;
+    }
+
+    int integer_points_on_line_segment(Point p1, Point p2) {
+        return __gcd(abs(p1.x - p2.x), abs(p1.y - p2.y)) + 1;
+    }
+
+    pair<int,int> get_lattic_points(vector<Point> points) {
+        int n = points.size();
+        int area = get_area(points);
+        // area = inside + boundary / 2 - 1
+        int boundary = 0;
+        for (int i = 0 ; i < n ; i++) {
+            Point p1 = points[i];
+            Point p2 = points[(i + 1) % n];
+            boundary += integer_points_on_line_segment(p1, p2);
+            boundary--;
+        }
+        int inside = area + 1 - boundary / 2;
+        return {inside, boundary};
+    }
+};

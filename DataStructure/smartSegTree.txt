@@ -1,49 +1,47 @@
-const int N = 1 << 20;
-struct Node {
-    ll sum , mxPre;
-    bool operator== (Node o) {
-        return (o.sum == sum && o.mxPre == mxPre);
-    }
-};
 template<class T> struct SegTree {
-    T GAR = {0, 0};
-    T f(T a, T b) {
-        T z;
-        z.sum = a.sum + b.sum;
-        z.mxPre = max(a.mxPre, a.sum + b.mxPre);
-        return z;
+    T GAR = 0;
+    int sz;
+    vector<T> t , lz;
+    SegTree() {}
+    SegTree(int n) {
+        sz = 1; while (sz < n) sz *= 2;
+        t.resize(2 * sz, GAR);
+        lz.resize(2 * sz, GAR);
     }
  
-    vector<T> t , lz;
-    SegTree() { t.resize(2 * N, GAR); lz.resize(2 * N, GAR); }
-    void lol(int k, int l, int r) {
+    T merge(T a, T b) { return a + b; }
+ 
+    void lol(int k, int s, int e) {
         if (lz[k] == GAR) return;
-        t[k] = lz[k];
-        if(l != r) {
-            lz[2*k] = lz[k];
-            lz[2*k+1] = lz[k];
+        t[k] = merge(t[k], lz[k] * (e - s + 1));
+        if(s != e) {
+            lz[2*k] = merge(lz[2*k], lz[k]);
+            lz[2*k+1] = merge(lz[2*k+1], lz[k]);
         }
         lz[k] = GAR;
     }
-    T update(int l, int r, T v, int k = 1 , int s = 0, int e = N - 1) {
+ 
+    T update(int l, int r, T v, int k = 1 , int s = 0, int e = -1) {
+        if (e == -1) e = sz - 1;
         lol(k, s, e);
         if(s > r || e < l) return t[k];
         if(l <= s && e <= r) {
             lz[k] = v;
-            return lz[k];
+            return merge(t[k] , lz[k] * (e - s + 1));
         }
         int mid = (s+e)>>1;
         T ch1 = update(l, r, v, k*2, s, mid);
         T ch2 = update(l, r, v, k*2+1, mid+1, e);
-        return t[k] = f(ch1 , ch2);
+        return t[k] = merge(ch1 , ch2);
     }
-    T get(int l , int r, int k = 1, int s = 0 , int e = N - 1) {
+    T get(int l , int r, int k = 1, int s = 0 , int e = -1) {
+        if (e == -1) e = sz - 1;
         lol(k, s, e);
         if(s > r || e < l) return GAR;
         if(l <= s && e <= r) return t[k];
         int mid = (s+e)>>1;
         T ch1 = get(l, r, k*2, s, mid);
         T ch2 = get(l, r, k*2+1, mid+1, e);
-        return f(ch1 , ch2);
+        return merge(ch1 , ch2);
     }
 };

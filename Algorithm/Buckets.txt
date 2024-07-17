@@ -6,25 +6,29 @@ vector<int> v(N);
 
 int lazy[lazy_size];
 
+int find(int idx) {
+    return idx / block_size;
+}
+
 int start(int a) {
     return a * block_size;
 }
 
 int end(int a) {
-    return (a + 1) * block_size - 1;
+    return min((a + 1) * block_size - 1, (int) v.size() - 1);
 }
 
 void push_down(int a) {
     // write code
-    for (int i = start(a) ; i <= end(a) && i < v.size() ; i++) {
+    for (int i = start(a) ; i <= end(a) ; i++) {
 
     }
     // clear lazy 
 }
 
 void update(int l, int r) {
-    int a = l / block_size;
-    int b = r / block_size;
+    int a = find(l);
+    int b = find(r);
 
     if (a == b) {
         push_down(a);

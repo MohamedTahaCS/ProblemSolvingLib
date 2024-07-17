@@ -1,4 +1,33 @@
-//--------------------------------------------------------//
+// ----------------------------------------------------//
+// change sz
+const int sz = 100;
+using Matrix = array<array<ll, sz>, sz>;
+const ll MOD = 1e9 + 7;
+ 
+Matrix mult(Matrix a, Matrix b) {
+    Matrix res = Matrix();
+    for (int i = 0 ; i < sz ; i++) {
+        for (int j = 0 ; j < sz ; j++) {
+            for (int k = 0 ; k < sz ; k++) {
+                res[i][j] += (a[i][k] * b[k][j]) % MOD;
+                res[i][j] %= MOD;
+            }
+        }
+    }
+    return res;
+}
+ 
+Matrix power(Matrix a, ll k) {
+    if (k == 1) return a; 
+    if (k & 1) return mult(power(a, k - 1), a);
+    Matrix res = power(a, k / 2);
+    return mult(res, res);
+}
+// ----------------------------------------------------//
+
+
+							another way
+/////////////////////////////////////////////////////////////////////////////////////
 using Matrix = vector<vector<long long>>;
 const int MOD = 1e9 + 7;
 
@@ -20,20 +49,22 @@ Matrix mult(Matrix a, Matrix b) {
     return res;
 }
 
-Matrix identity(int n) {
+Matrix get_identity(int n) {
     Matrix res = zero(n);
     for (int i = 0 ; i < n ; i++) 
         res[i][i] = 1;
     return res;
 }
 
-Matrix power(Matrix &a, ll k) {
+Matrix power(Matrix a, ll k) {
     int n = a.size();
-    if (k == 0) return identity(n);
-    if (k == 1) return a;
-    Matrix res = power(a, k/2);
-    if (k & 1) return mult(a, mult(res, res));
-    return mult(res, res);
+    Matrix res = get_identity(n);
+    while(k) {
+        if (k & 1) res = mult(res, a);
+        a = mult(a, a);
+        k >>= 1;
+    }
+    return res;
 }
 
 void print(Matrix a) {
@@ -72,12 +103,6 @@ Matrix power_sum(Matrix &x, ll k) { // x^1 + x^2 + .. + x^k
 }
 
 /////////////////////////////////
-ll matrixTrace(matrix x) {
-    ll ret = 0;
-    lp(i, x.size()) ret += x[i][i];
-    return ret;
-}
-
 matrix rotate(matrix x) {
     matrix ret = zero(x[0].size(), x.size());
     lp(i, x.size()) {

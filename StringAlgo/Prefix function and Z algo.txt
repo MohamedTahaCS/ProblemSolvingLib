@@ -1,0 +1,46 @@
+pi[i] is the length of the longest proper prefix of the substring [0 to i]  which is also a suffix of this substring.
+A proper prefix of a string is a prefix that is not equal to the string itself.
+
+// example s = "aabaaab" pi = [0, 1, 0, 1, 2, 2, 3]
+
+vector<int> prefix_function(string s) {
+    int n = (int)s.length();
+    vector<int> pi(n);
+    for (int i = 1; i < n; i++) {
+        int j = pi[i-1];
+        while (j > 0 && s[i] != s[j])
+            j = pi[j-1];
+        if (s[i] == s[j])
+            j++;
+        pi[i] = j;
+    }
+    return pi;
+}
+
+
+// ------------------------------------------------------------------------------------- //
+The Z-function for this string is an array of length n where the i-th element is equal to the greatest number of 
+characters starting from the position i that coincide with the first characters of s.
+
+aaabaab -> [0, 2, 1, 0, 2, 1, 0]
+// z[0] is zero even it should be n
+abacaba -> [0, 0, 1, 0, 3, 0, 1]
+
+vector<int> z_function(string s) {
+    int n = s.size();
+    vector<int> z(n);
+    int l = 0, r = 0;
+    for(int i = 1; i < n; i++) {
+        if(i < r) {
+            z[i] = min(r - i, z[i - l]);
+        }
+        while(i + z[i] < n && s[z[i]] == s[i + z[i]]) {
+            z[i]++;
+        }
+        if(i + z[i] > r) {
+            l = i;
+            r = i + z[i];
+        }
+    }
+    return z;
+}

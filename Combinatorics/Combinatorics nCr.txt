@@ -285,3 +285,23 @@ ll countDistinctWays(ll N, ll M)
     ans %= MOD;
     return ans;
 }
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// how many of the first n positive integers are divisible by at least one of the given (k) prime numbers.
+ll res = 0;
+vector<ll> primes(k);
+for (auto &x : primes) cin >> x;
+for (int mask = 1 ; mask < (1<<k) ; mask++) {
+    ll len = 0 , lcm = 1;
+    bool over = false;
+    for (int j = 0 ; j < k ; j++) {
+        if (mask & (1<<j)) {
+            len++;
+            if (isOverflow(lcm, primes[j])) {over = true ; break;}
+            lcm *= primes[j];
+        }
+    }
+    if (over) continue;
+    if (len % 2 == 1) res += n / lcm; // inc
+    else res -= n / lcm; // exc
+}
+////////////////////////////////////////
