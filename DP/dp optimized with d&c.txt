@@ -1,0 +1,44 @@
+Given an array of n elements, your task is to divide into k subarrays. The cost of each subarray is the square of the sum of the values in the subarray. What is the minimum total cost if you act optimally?
+
+vector<int> pre(3001);
+int sum(int l, int r) {
+    return pre[r] - pre[l - 1];
+}
+ 
+int cost(int i, int j) {
+    if (i > j) swap(i, j);
+    return sum(i, j) * sum(i, j);
+}
+ 
+void divide_and_conquer(int k, int l, int r, int optl, int optr, vector<vector<int>> &dp) {
+    if (l > r) return;
+ 
+    int mid = (l + r) / 2;
+ 
+    int opt = mid;
+ 
+    for (int j = min(mid, optr) ; j >= optl ; j--) {
+        int before = dp[mid][k];
+        dp[mid][k] = min(dp[mid][k], dp[j - 1][k - 1] + cost(j, mid));
+        if (before != dp[mid][k]) opt = j;
+    }
+ 
+    divide_and_conquer(k, l, mid - 1, optl, opt, dp);
+    divide_and_conquer(k, mid + 1, r, opt, optr, dp);
+}
+ 
+void code() {
+    int n, kk;
+    cin >> n >> kk;
+    vector<int> v(n + 1);
+    for (int i = 1 ; i <= n ; i++) cin >> v[i], pre[i] = pre[i - 1] + v[i];
+ 
+    vector<vector<int>> dp(n + 1, vector<int> (kk + 1, 1e18));
+    dp[0][0] = 0;
+    
+    for (int k = 1 ; k <= kk ; k++) {
+        divide_and_conquer(k, 1, n, 1, n, dp);
+    }
+ 
+    cout << dp[n][kk];
+}

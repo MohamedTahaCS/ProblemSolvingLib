@@ -1,0 +1,32 @@
+Given an array of n numbers, your task is to divide it into n subarrays, each of which has a single element.
+On each move, you may choose any subarray and split it into two subarrays. The cost of such a move is the sum of values in the chosen subarray.
+What is the minimum total cost if you act optimally?
+
+vector<vector<int>> dp(n, vector<int>(n, 1e18));
+int opt[n][n];
+memset(opt, 0, sizeof opt);
+
+for (int l = n - 1 ; l >= 0 ; l--) {
+    for (int r = l ; r < n ; r++) {
+        if (l == r) dp[l][r] = 0;
+        else {
+            int start = l;
+            if (l != r) start = opt[l][r - 1];
+
+            int end = r - 1;
+            if (r != n - 1) end = opt[l + 1][r + 1];
+
+            for (int k = start ; k <= end ; k++) {
+                int b = dp[l][r];
+                dp[l][r] = min(dp[l][r], dp[l][k] + dp[k + 1][r] + sum(l, r));
+                if (dp[l][r] != b) {
+                    opt[l][r] = k;
+                }
+            }
+        }
+        // cout << opt[l][r] <<" ";
+    }
+    // cout << endl;
+}
+
+cout << dp[0][n - 1];
